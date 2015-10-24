@@ -3,17 +3,23 @@
 
 stm <- function(documents, vocab, K, 
                 prevalence, content, data=NULL,
-                init.type=c("LDA", "Random", "Spectral"), seed=NULL, 
-                max.em.its=500, emtol=1e-5,
+                init_type=c("LDA", "Random", "Spectral"), seed=NULL, 
+                max_em_its=500, emtol=1e-5,
                 verbose=TRUE, reportevery=5,   
                 LDAbeta=TRUE, interactions=TRUE, 
                 ngroups=1, model=NULL,
-                gamma.prior=c("Pooled", "L1"), sigma.prior=0,
-                kappa.prior=c("L1", "Jeffreys"), control=list())  {
+                gamma_prior=c("Pooled", "L1"), sigma_prior=0,
+                kappa_prior=c("L1", "Jeffreys"), control=list())  {
   
   #Match Arguments and save the call
-  init.type <- match.arg(init.type)
+  init_type <- match.arg(init_type)
   Call <- match.call()
+
+  # Some cleaning of the Python-R interface
+  init.type = init_type; max.em.its = max_em_its;
+  gamma_prior = match.arg(gamma_prior);
+  kappa_prior = match.arg(kappa.prior)
+  sigma.prior = sigma_prior;
 
   #Documents
   if(missing(documents)) stop("Must include documents")
@@ -138,12 +144,12 @@ stm <- function(documents, vocab, K,
                    topicreportevery=reportevery,
                    convergence=list(max.em.its=max.em.its, em.converge.thresh=emtol),
                    covariates=list(X=xmat, betaindex=betaindex, yvarlevels=yvarlevels),
-                   gamma=list(mode=match.arg(gamma.prior), prior=NULL, enet=1),
+                   gamma=list(mode=gamma_prior, prior=NULL, enet=1),
                    sigma=list(prior=sigma.prior),
                    kappa=list(LDAbeta=LDAbeta, interactions=interactions, 
                               fixedintercept=TRUE, mstep=list(tol=.001, maxit=3),
                               contrast=FALSE),
-                   tau=list(mode=match.arg(kappa.prior), tol=1e-5,
+                   tau=list(mode=kappa_prior, tol=1e-5,
                             enet=1,nlambda=250, lambda.min.ratio=.001, ic.k=2,
                             maxit=1e4),
                    init=list(mode=init.type, nits=50, burnin=25, alpha=(50/K), eta=.01,

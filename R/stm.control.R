@@ -25,7 +25,8 @@ stm.control <- function(documents, vocab, settings, model) {
     convergence <- NULL 
     #discard the old object
     rm(model)
-  } else {
+  }
+   else {
     if(verbose) cat("Restarting Model...\n")
     #extract from a standard STM object so we can simply continue.
     mu <- model$mu
