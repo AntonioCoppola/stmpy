@@ -18,7 +18,7 @@ stm <- function(documents, vocab, K,
   # Some cleaning of the Python-R interface
   init.type = init_type; max.em.its = max_em_its;
   gamma_prior = match.arg(gamma_prior);
-  kappa_prior = match.arg(kappa.prior)
+  kappa_prior = match.arg(kappa_prior)
   sigma.prior = sigma_prior;
 
   #Documents
