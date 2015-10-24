@@ -28,6 +28,7 @@ report <- function(convergence, ntokens, beta, vocab, topicreportevery, verbose)
   
   printState <- verbose && itnum%%topicreportevery==0
   if(printState) {
+    cat("\n")
     if(is.null(beta$kappa)) {
       wordmat <- apply(beta$beta[[1]],1,function(x) vocab[order(x,decreasing=TRUE)[1:5]])
       labs <- apply(wordmat, 2, function(x) paste(x,collapse=", "))

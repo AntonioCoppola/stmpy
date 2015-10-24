@@ -14,7 +14,7 @@ stm <- function(documents, vocab, K,
   #Match Arguments and save the call
   init.type <- match.arg(init.type)
   Call <- match.call()
-  
+
   #Documents
   if(missing(documents)) stop("Must include documents")
   if(!is.list(documents)) stop("documents must be a list, see documentation.")
