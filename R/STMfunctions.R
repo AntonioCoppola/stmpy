@@ -141,6 +141,14 @@ safelog <- function(x) {
   out
 }
 
+theta_from_lambda <- function(x){
+  exp(x - row.lse(x))
+}
+
+eta_from_lambda <- function(x){
+  x[,-ncol(x), drop=FALSE]
+}
+
 ########
 # Some functions for working with glmnet
 ########

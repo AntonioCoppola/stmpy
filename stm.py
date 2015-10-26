@@ -130,6 +130,7 @@ class STM:
         self.theta = None
         self.eta = None
         self.invsigma = None
+        self.em_time = None
 
     def __repr__(self):
         return "An object of class STM. Not yet trained."
@@ -142,16 +143,30 @@ class STM:
         return dict(zip(rlist.names,
                    list(rlist)))
 
+    # Conversion function: beta_ss (uses dict comprehension, not compatible with 2.7+)
+    # def __pybeta_ss_2r__(self, beta):
+    #     return robjects.ListVector( 
+    #         robjects.ListVector({str(i+1):robjects.Matrix(mat) for i, mat in enumerate(beta)}))
+
+    # Conversion function: beta (uses dict comprehension, not compatible with 2.7+)
+    # def __pybeta_2r__(self, beta):
+    #     return robjects.ListVector({'beta':
+    #                      robjects.ListVector({str(i+1):robjects.Matrix(mat) for i, mat in enumerate(beta)})
+    #                     })
+
     # Conversion function: beta_ss
     def __pybeta_ss_2r__(self, beta):
-        return robjects.ListVector( 
-            robjects.ListVector({str(i+1):robjects.Matrix(mat) for i, mat in enumerate(beta)}))
+        out = {}
+        for i, mat in enumerate(beta):
+            out[str(i+1)] = robjects.Matrix(mat)
+        return out
 
     # Conversion function: beta
     def __pybeta_2r__(self, beta):
-        return robjects.ListVector({'beta':
-                         robjects.ListVector({str(i+1):robjects.Matrix(mat) for i, mat in enumerate(beta)})
-                        })
+        out = {}
+        for i, mat in enumerate(beta):
+            out[str(i+1)] = robjects.Matrix(mat)
+        return {'beta': out}
 
     # Conversion function: mu
     def __rmu_2py__(self, mu):
@@ -197,6 +212,21 @@ class STM:
             beta_ss[doc['aspect']-1][:,[j-1 for j in doc['words']]] -= doc['phis']
         
         return sigma_ss, beta_ss, bound, Lambda
+
+    # Function to package the model
+    def __package_model__(self):
+
+        model = {"mu": robjects.ListVector(self.mu), 
+        "sigma": self.sigma, 
+        "beta": robjects.ListVector({"beta": self.logbeta, "logbeta": self.logbeta}),
+        "settings": robjects.ListVector(self.settings),
+        "vocab": self.vocab,
+        "convergence": self.convergence,
+        "theta": self.theta,
+        "eta": self.eta,
+        "invsigma": self.invsigma}
+
+        return robjects.ListVector(model)
 
     def train(self, data, document_col, K, prevalence=None, content=None, init_type="Spectral", 
         seed=None, max_em_its=500, emtol=1e-5, verbose=True, reportevery=5, 
@@ -371,6 +401,9 @@ class STM:
         except:
             i = 0
 
+        # Initiate timer
+        start_time = time.clock()
+
         # Run EM!
         while stopits is not True:
             
@@ -395,7 +428,7 @@ class STM:
                 beta_new_temp = robjects.globalenv['opt.beta'](self.__pybeta_ss_2r__(beta_ss), 
                                                                robjects.r('beta$kappa'), 
                                                                robjects.r('settings'))
-                beta_new = [np.array(x) for x in beta_new_temp[0]]
+                beta = [np.array(x) for x in beta_new_temp[0]]
                 
                 if verbose:
                     print "Completed M-Step, Iteration " +  str(i+1)
@@ -421,15 +454,40 @@ class STM:
             if verbose:
                 print ""
 
+        # Some book-keeping
+        self.em_time = time.clock() - start_time
         self.trained = True
 
-    def find_thoughts(self):
-        return None
+        # Save the results
+        self.beta = beta
+        self.logbeta = [np.log(x) for x in self.beta]
+        self.Lambda = Lambda
+        self.mu = mu
+        self.sigma = sigma
+        self.settings = settings
+        self.vocab = robjects.r.vocab
+        self.convergence = convergence
+        self.theta = np.array(robjects.r("theta_from_lambda")(Lambda))
+        self.eta = np.array(robjects.r("eta_from_lambda")(Lambda))
+        self.invsigma = np.linalg.inv(sigma)
+
+    def label_topics(self, n=7, topics=None, frexweight=.5):
+        return robjects.r.labelTopics(self.__package_model__(), 
+            n=n, frexweight=frexweight)
+
+    def print_topics(self, n=7, topics=None, frexweight=.5):
+        robjects.r("print.labelTopics")(self.label_topics(n=n, 
+            frexweight=frexweight))
+
+    def find_thoughts(self, texts, topics=1, n=2, thresh=0.0):
+        return robjects.r("findThoughts")(self.__package_model__(), texts, 
+            n=n, topics=topics)
+
+    def print_thoughts(self, texts, topics=1, n=2, thresh=0.0):
+        robjects.r("plot.findThoughts")(self.find_thoughts(texts), n=n,
+            topics=topics)
 
     def estimate_effect(self):
-        return None
-
-    def label_topics(self):
         return None
 
     def plot_estimate_effect(self):
