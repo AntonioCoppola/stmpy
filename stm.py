@@ -159,14 +159,14 @@ class STM:
         out = {}
         for i, mat in enumerate(beta):
             out[str(i+1)] = robjects.Matrix(mat)
-        return out
+        return robjects.ListVector(out)
 
     # Conversion function: beta
     def __pybeta_2r__(self, beta):
         out = {}
         for i, mat in enumerate(beta):
             out[str(i+1)] = robjects.Matrix(mat)
-        return {'beta': out}
+        return robjects.ListVector({'beta': robjects.ListVector(out)})
 
     # Conversion function: mu
     def __rmu_2py__(self, mu):
