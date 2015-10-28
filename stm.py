@@ -78,13 +78,10 @@ def __hpb__(eta, beta, doc_ct, mu, siginv, sigmaentropy):
     diff = eta - mu.flatten()
 
     # Compute the bound
-    bound = (np.dot(np.log(np.dot(theta, beta)), doc_ct) + det_term 
-             - 0.5 * np.dot(diff.T, np.dot(siginv, diff)) - sigmaentropy)
+    bound = (np.dot(np.log(np.dot(theta, beta)), doc_ct) + det_term - 0.5 * np.dot(diff.T, np.dot(siginv, diff)) - sigmaentropy)
 
     # Construct output
-    out = {'phis': EB,
-           'eta': {'lambda': eta, 'nu': nu},
-           'bound': bound}
+    out = {'phis': EB, 'eta': {'lambda': eta, 'nu': nu},'bound': bound}
     return out
 
 # Code for worker node dispatch
