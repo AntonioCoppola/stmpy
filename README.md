@@ -1,3 +1,3 @@
-# stm: Structural Topic Model in PySpark
+# Covariate-Augmente Probabilitic Topic Models in PySpark
 
-Under active development. The [Structural Topic Model](http://structuraltopicmodel.com/) (STM) allows users to estimate topic models with document-level covariates. This Python library runs in both serial and parallel modes using PySpark. The package includes tools for model selection, visualization, and estimation of topic-covariate regressions.
+Under active development. This Python library implements a set of probabilistic topic models that allow integration of arbitrary document-level metainformation into the generative process for the data. The models implemented include the [Structural Topic Model](http://structuraltopicmodel.com/) (STM) of Roberts, Stewart, and Tingley, as well a nonparametric variant, Covariate-Augmented Nonparametric Latent Dirichlet Allocation (C-LDA). While the software can be run in serial on a local machine, all the methods support parallel computation using Apache Spark. The package includes tools for model selection, visualization, and estimation of topic-covariate regressions.
