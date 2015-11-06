@@ -1,4 +1,4 @@
-# Covariate-Augmented Probabilitic Topic Models in PySpark
+# Covariate-Augmented Probabilistic Topic Models in PySpark
 
 *This repository is under active development.*
 
