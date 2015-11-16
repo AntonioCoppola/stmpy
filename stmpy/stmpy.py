@@ -12,6 +12,17 @@ from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
 warnings.filterwarnings('ignore')
 
+# Intall any missing R packages
+rpy2.robjects.r('''
+    packages <- c('Matrix', 'stringr', 'splines', 'matrixStats', 
+    'slam', 'lda', 'glmnet', 'magrittr', 'tm', 'SnowballC')
+
+    if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+        cat("Installation of certain R packages is required for stmpy\n")
+        install.packages(setdiff(packages, rownames(installed.packages())))  
+    }
+''')
+
 # R Imports for STM
 for __f__ in os.listdir("R"):
     if __f__ not in ['.DS_Store', '.Rapp.history']:
@@ -139,18 +150,7 @@ class STM:
     def __rlist_2py__(self, rlist):
         return dict(zip(rlist.names,
                    list(rlist)))
-
-    # Conversion function: beta_ss (uses dict comprehension, not compatible with 2.7+)
-    # def __pybeta_ss_2r__(self, beta):
-    #     return robjects.ListVector( 
-    #         robjects.ListVector({str(i+1):robjects.Matrix(mat) for i, mat in enumerate(beta)}))
-
-    # Conversion function: beta (uses dict comprehension, not compatible with 2.7+)
-    # def __pybeta_2r__(self, beta):
-    #     return robjects.ListVector({'beta':
-    #                      robjects.ListVector({str(i+1):robjects.Matrix(mat) for i, mat in enumerate(beta)})
-    #                     })
-
+        
     # Conversion function: beta_ss
     def __pybeta_ss_2r__(self, beta):
         out = {}
