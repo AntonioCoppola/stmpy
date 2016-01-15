@@ -8,6 +8,8 @@ setup(
     author='Antonio Coppola, Margaret E. Roberts, Brandon M. Stewart and Dustin Tingley',
     author_email="acoppola@college.harvard.edu, bms4@princeton.edu",
     packages=['stmpy'],
+    package_dir={'stmpy': 'stmpy'},
+    package_data={'stmpy': ['R/*.R']},
     install_requires=['numpy>=1.9', 'six'],
     setup_requires=['numpy>=1.9'],
     keywords=['Topic models', 'natural language processing', 
@@ -16,5 +18,4 @@ setup(
     url='https://github.com/AntonioCoppola/stmpy',
     license='MIT',
     classifiers=['Programming Language :: Python :: 2.7'],
-    ext_modules=extensions,
 )

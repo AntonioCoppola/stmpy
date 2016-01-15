@@ -3,6 +3,7 @@ import rpy2
 import time
 import os
 import warnings
+import pkgutil
 import numpy as np
 import scipy as sp
 import rpy2.robjects as robjects
@@ -19,14 +20,32 @@ rpy2.robjects.r('''
 
     if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
         cat("Installation of certain R packages is required for stmpy\n")
-        install.packages(setdiff(packages, rownames(installed.packages())))  
+        install.packages(setdiff(packages, rownames(installed.packages())), 
+            repos='http://cran.us.r-project.org')  
     }
 ''')
 
-# R Imports for STM
-for __f__ in os.listdir("R"):
-    if __f__ not in ['.DS_Store', '.Rapp.history']:
-        robjects.r.source("R/" + __f__)
+# R imports for STM
+for __f__ in ['checkBeta.R', 'checkFactors.R', 'cloud.R', 'dmr.R', 
+    'estimateEffect.R', 'exclusivity.R', 'findThoughts.R', 'findTopic.R', 
+    'heldout.R', 'jeffreyskappa.R', 'labelTopics.R', 'manyTopics.R', 
+    'multiSTM.R', 'parseFormulas.R', 'permute.R', 'plot.estimateEffect.R', 
+    'plot.searchK.R', 'plot.STM.R', 'plotModels.R', 'plotQuote.R', 
+    'plotRemoved.R', 'plottingutilfns.R', 'plotTopicLoess.R', 'prepDocuments.R',
+    'produce_cmatrix.R', 'RcppExports.R', 'readCorpus.R', 'residuals.R', 's.R',
+    'sageLabels.R', 'searchK.R', 'selectModel.R', 'semanticCoherence.R', 
+    'simBetas.R', 'spectral.R', 'stm.control.R', 'stm.R', 'STMconvergence.R', 
+    'STMestep.R', 'STMfunctions.R', 'STMinit.R', 'STMlncpp.R', 'STMmnreg.R', 
+    'STMmu.R', 'STMoptbeta.R', 'STMreport.R', 'STMsigma.R', 'summary.STM.R', 
+    'tau.R', 'textProcessor.R', 'thetaPosterior.R', 'toLDAvis.R', 'topicCorr.R', 
+    'topicLasso.R', 'topicQuality.R', 'writeLdac.R']:
+    data = pkgutil.get_data('stmpy', 'R/' + __f__)
+    robjects.r(data)
+
+# R Imports for STM (outdated)
+# for __f__ in os.path.realpath('..') + "/R": #os.listdir("R"):
+#     if __f__ not in ['.DS_Store', '.Rapp.history']:
+#         robjects.r.source("R/" + __f__)
 
 # R library imports
 for __pkg__ in ['Matrix', 'stringr', 'splines', 'matrixStats', 
