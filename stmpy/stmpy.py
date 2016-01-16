@@ -139,8 +139,18 @@ def __estep_docloop__(doc_item, siginv, sigmaentropy):
 
 # Core class definition
 class STM:
+    '''
+    This class implements the Structural Topic Model, a general approach to 
+    including document-level metadata within mixed-membership topic models. 
+
+    Constructor Parameters:
+      sc - Spark Context
+    '''
 
     def __init__(self, sc):
+        '''
+        Model constructor
+        '''
         self.sc = sc
         self.trained = False
         self.mu = None
@@ -155,10 +165,16 @@ class STM:
         self.em_time = None
 
     def __repr__(self):
-        return "An object of class STM. Not yet trained."
+        if self.trained == False:
+            return "An object of class STM. Not yet trained."
+        else:
+            return "An object of class STM."
 
     def __print__(self):
-        return "An object of class STM. Not yet trained."
+        if self.trained == False:
+            return "An object of class STM. Not yet trained."
+        else:
+            return "An object of class STM."
 
     # Conversion function: R list to Python dict
     def __rlist_2py__(self, rlist):
@@ -243,6 +259,80 @@ class STM:
         seed=None, max_em_its=500, emtol=1e-5, verbose=True, reportevery=5, 
         LDAbeta=True, interactions=True, ngroups=1, gamma_prior="Pooled", 
         sigma_prior=0, kappa_prior="L1"):
+        '''
+        Train a STM model
+
+        Parameters:
+          data - Pandas dataframe
+            The data, in the form of a Pandas dataframe
+
+          document_col - string
+            Name of the data column containing the raw text 
+          
+          K - int 
+            Number of topics
+
+          prevalence - string | list of strings
+            Name or list of names of columns containing prevalence covariates
+          
+          content - string | list of strings
+            Name or list of names of columns containing content covariates 
+          
+          init_type - string
+            The method of initialization. Must be either Latent Dirichlet Allocation 
+            ("LDA"), "Random" or "Spectral".
+          
+          seed - int
+            Random seed
+          
+          max_em_its - int 
+            The maximum number of EM iterations. If convergence has not been met 
+            at this point, a message will be printed.
+
+          emtol - float
+            Convergence tolerance. EM stops when the relative change in the approximate 
+            bound drops below this level. Defaults to .00001.
+
+          verbose - bool
+            A logical flag indicating whether information should be printed to the 
+            screen. During the E-step (iteration over documents) a dot will print 
+            each time one percent of the documents are completed. At the end of each 
+            iteration the approximate bound will also be printed.
+
+          reportevery - int
+            An integer determining the intervals at which labels are printed to 
+            the screen during fitting. Defaults to every 5 iterations.
+
+          LDAbeta - bool
+            A logical that defaults to True when there are no content covariates. 
+            When set to FALSE the model performs SAGE style topic updates (sparse 
+            deviations from a baseline).
+
+          interactions - bool
+            A logical that defaults to TRUE. This automatically includes interactions 
+            between content covariates and the latent topics. Setting it to FALSE 
+            reduces to a model with no interactive effects.
+
+          ngroups - int
+            Number of groups for memoized inference.
+
+          gamma_prior - string
+            Sets the prior estimation method for the prevalence covariate model. 
+            The default Pooled options uses Normal prior distributions with a 
+            topic-level pooled variance which is given a broad gamma hyperprior. 
+            The alternative L1 uses glmnet to estimate a grouped penalty between L1-L2.
+
+          sigma_prior - int
+            A scalar between 0 and 1 which defaults to 0. This sets the strength of 
+            regularization towards a diagonalized covariance matrix. Setting the value 
+            above 0 can be useful if topics are becoming too highly correlated.
+
+          kappa_prior - int
+            Sets the prior estimation for the content covariate coefficients. 
+            The default option is the L1 prior. The second option is Jeffreys 
+            which is markedly less computationally efficient but is included for 
+            backwards compatability.
+        '''
 
         # Blocked updates are not yet supported
         if ngroups > 1:
@@ -483,23 +573,73 @@ class STM:
         self.invsigma = np.linalg.inv(sigma)
 
     def label_topics(self, n=7, topics=None, frexweight=.5):
+        '''
+        Generate a set of words describing each topic from a fitted STM object. 
+        Uses a variety of labeling algorithms (see details).
+
+        Parameters:
+          n - int
+            The desired number of words (per type) used to label each topic.
+
+          topics - list of ints
+            A vector of numbers indicating the topics to include. Default is all topics.
+
+          frexweight - float
+            A weight used in our approximate FREX scoring algorithm.
+        '''
         return robjects.r.labelTopics(self.__package_model__(), 
             n=n, frexweight=frexweight)
 
-    def print_topics(self, n=7, topics=None, frexweight=.5):
-        robjects.r("print.labelTopics")(self.label_topics(n=n, 
-            frexweight=frexweight))
+    # def print_topics(self, n=7, topics=None, frexweight=.5):
+    #     '''
+    #     Generate a set of words describing each topic from a fitted STM object. 
+    #     Uses a variety of labeling algorithms (see details).
+
+    #     Parameters:
+
+    #     '''
+    #     robjects.r("print.labelTopics")(self.label_topics(n=n, 
+    #         frexweight=frexweight))
 
     def find_thoughts(self, texts, topics=1, n=2, thresh=0.0):
+        '''
+        TODO
+        '''
         return robjects.r("findThoughts")(self.__package_model__(), texts, 
             n=n, topics=topics)
 
-    def print_thoughts(self, texts, topics=1, n=2, thresh=0.0):
-        robjects.r("plot.findThoughts")(self.find_thoughts(texts), n=n,
-            topics=topics)
+    def save_model(self, file_name="stm_model.RData"):
+        '''
+        Save the fitted model as an R object.
 
-    def estimate_effect(self):
-        return None
+        Parameters:
+          file_name - string
+             The name of the file where the data will be saved
+        '''
+        if self.trained == False:
+            print "The model has not been fitted yet."
 
-    def plot_estimate_effect(self):
-        return None
+        else:
+            modsave = {"mu": robjects.ListVector(self.mu), 
+                "sigma": self.sigma, 
+                "beta": robjects.ListVector({"beta": self.logbeta, "logbeta": self.logbeta}),
+                "settings": robjects.ListVector(self.settings),
+                "vocab": self.vocab,
+                "convergence": self.convergence,
+                "theta": self.theta,
+                "eta": self.eta,
+                "invsigma": self.invsigma}
+
+            robjects.globalenv["modsave"] = robjects.ListVector(modsave)
+            robjects.r("save(modsave, file='" + filename + "')" )
+            print "STM model saved as R object."
+
+    # def print_thoughts(self, texts, topics=1, n=2, thresh=0.0):
+    #     robjects.r("plot.findThoughts")(self.find_thoughts(texts), n=n,
+    #         topics=topics)
+
+    # def estimate_effect(self):
+    #     return None
+
+    # def plot_estimate_effect(self):
+    #     return None

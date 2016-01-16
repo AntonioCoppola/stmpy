@@ -33,7 +33,7 @@ execfile(os.path.join(spark_home, 'python/pyspark/shell.py'))
 c = get_config()
 c.NotebookApp.ip = '*'
 c.NotebookApp.open_browser = False
-c.NotebookApp.port = 9999" >> ~/.ipython/profile_pyspark/startup/00-pyspark-setup.py
+" >> ~/.ipython/profile_pyspark/startup/00-pyspark-setup.py
 
 mkdir -p ~/.ipython/kernels/pyspark
 echo -e '{"display_name": "pySpark (Spark 1.4.0)","language": "python","argv": [ "/usr/bin/python27", "-m", "IPython.kernel", "--profile=pyspark", "-f", "{connection_file}"]}' >> ~/.ipython/kernels/pyspark/kernel.json
