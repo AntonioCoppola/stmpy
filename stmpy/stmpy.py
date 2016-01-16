@@ -42,11 +42,6 @@ for __f__ in ['checkBeta.R', 'checkFactors.R', 'cloud.R', 'dmr.R',
     data = pkgutil.get_data('stmpy', 'R/' + __f__)
     robjects.r(data)
 
-# R Imports for STM (outdated)
-# for __f__ in os.path.realpath('..') + "/R": #os.listdir("R"):
-#     if __f__ not in ['.DS_Store', '.Rapp.history']:
-#         robjects.r.source("R/" + __f__)
-
 # R library imports
 for __pkg__ in ['Matrix', 'stringr', 'splines', 'matrixStats', 
     'slam', 'lda', 'glmnet', 'magrittr']:
