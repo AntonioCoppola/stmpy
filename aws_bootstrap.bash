@@ -19,7 +19,7 @@ sudo pip-2.7 install ipython notebook findspark
 
 ipython profile create pyspark
 export SPARK_HOME=/usr/lib/spark
-echo -e "import os
+sudo echo -e "import os
 import sys
 
 spark_home = os.environ.get('SPARK_HOME', None)
@@ -35,12 +35,12 @@ c.NotebookApp.ip = '*'
 c.NotebookApp.open_browser = False
 " >> ~/.ipython/profile_pyspark/startup/00-pyspark-setup.py
 
-mkdir -p ~/.ipython/kernels/pyspark
-echo -e '{"display_name": "pySpark (Spark 1.4.0)","language": "python","argv": [ "/usr/bin/python27", "-m", "IPython.kernel", "--profile=pyspark", "-f", "{connection_file}"]}' >> ~/.ipython/kernels/pyspark/kernel.json
+sudo mkdir -p ~/.ipython/kernels/pyspark
+sudo echo -e '{"display_name": "pySpark (Spark 1.4.0)","language": "python","argv": [ "/usr/bin/python27", "-m", "IPython.kernel", "--profile=pyspark", "-f", "{connection_file}"]}' >> ~/.ipython/kernels/pyspark/kernel.json
 
 jupyter notebook --generate-config
 sudo rm ~/.jupyter/jupyter_notebook_config.py
-echo -e "c = get_config()
+sudo echo -e "c = get_config()
 c.IPKernelApp.pylab = 'inline'
 c.NotebookApp.ip = '*'
 c.NotebookApp.open_browser = False

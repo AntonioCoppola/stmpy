@@ -533,6 +533,7 @@ class STM:
                 
                 if verbose:
                     print "Completed M-Step, Iteration " +  str(i+1)
+                    print "Time per EM iteration: " + str(str((time.clock() - start_time) / (i+1)))
             
             # Check for convergence
             try:
@@ -603,7 +604,9 @@ class STM:
 
     def find_thoughts(self, texts, topics=1, n=2, thresh=0.0):
         '''
-        TODO
+        Outputs most representative documents for a particular topic. 
+        Use this in order to get a better sense of the content of actual documents 
+        with a high topical content.
         '''
         return robjects.r("findThoughts")(self.__package_model__(), texts, 
             n=n, topics=topics)
