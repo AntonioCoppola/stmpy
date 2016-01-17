@@ -533,7 +533,6 @@ class STM:
                 
                 if verbose:
                     print "Completed M-Step, Iteration " +  str(i+1)
-                    print "Time per EM iteration: " + str(str((time.clock() - start_time) / (i+1)))
             
             # Check for convergence
             try:
